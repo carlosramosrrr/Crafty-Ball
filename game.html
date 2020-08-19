@@ -1,0 +1,657 @@
+
+<!DOCTYPE html>
+<html>
+<head>
+    <title>CraftyBall</title>
+    <style>
+     body{
+         background: rgb(255,255,255);
+         margin-left: 350px;
+     }
+
+
+
+    </style>
+    <meta charset="UTF-8">
+    <script src="http://cdnjs.cloudflare.com/ajax/libs/processing.js/1.4.8/processing.min.js"></script>
+</head>
+<h1>
+    <div style="font-family:verdana;"><b><center><font color = "#00bfff" face="Comic sans MS" size="9">CraftyBall</font></center></b></div>
+</h1>
+<body>
+
+
+<canvas id="canvas"></canvas>
+<br>
+
+
+<script>
+
+
+    var music =new Audio('FiRe.mp3');
+    music.loop=true;
+    music.play();
+
+
+
+    var canvas = document.getElementById("canvas");
+    var canvasWidth  = 630;
+    var canvasHeight = 600;
+
+
+    var processing = new Processing(canvas, function(processing)
+    {
+        processing.size(canvasWidth, canvasHeight);
+        processing.background(0xFFF);
+
+
+        // Changes API to use degrees rather than radians in rotate and arc.
+        var rotateFn = processing.rotate;
+        processing.rotate = function (angle)
+        {
+            rotateFn(processing.radians(angle));
+        };
+        var arcDeg = processing.arc;
+        processing.arc = function (x, y, w, h, s, e)
+        {
+            arcDeg(x, y, w, h, s * (Math.PI / 180), e * (Math.PI / 180));
+        };
+
+
+        with (processing)
+        { //================ YOU MODIFY CODE IN THIS BLOCK =====================
+
+
+            //===========================================================
+            // Constructor for Ball object
+            //===========================================================
+            var Ball = function( x,y,edgeColor, fillColor)
+            {
+                this.x = x;
+                this.y = y;
+                this.edgeColor = edgeColor;
+                this.fillColor = fillColor;
+                this.speedX = 0;
+                this.speedY = 0;
+                this.size = 15;
+                this.running = false;
+            }
+            var Rectangle = function (x,y,edgeColor, fillColor)
+            {
+                this.x = x;
+                this.y = y;
+                this.edgeColor = edgeColor;
+                this.fillColor = fillColor;
+                //this.speedX = 0;
+                this.width = 15;
+                this.height = 15;
+            }
+
+
+            //===========================================================
+            // Draw this ball
+            //===========================================================
+            Ball.prototype.drawMe = function ()
+            {
+                console.log("Ball.prototype.drawMe(): x="+this.x +
+                        ", y="+this.y);
+                strokeWeight(2);
+                stroke(this.edgeColor);
+                fill(this.fillColor);
+                ellipse(this.x, this.y, this.size, this.size);
+            };
+            Rectangle.prototype.drawMe = function()
+            {
+                strokeWeight(2);
+                stroke(this.edgeColor);
+                fill(this.fillColor);
+                rect(this.x, this.y, this.width, this.height);
+            };
+
+
+            //================================================================
+            //  Code called when the page is loaded.
+            //================================================================
+            var IVORY = color(255, 255, 240);
+            var PURPLE = color(120, 81, 169);
+            var MEDIUM_PURPLE = color(147, 112, 219);
+            var ARTICHOKE = color(75, 181, 68);
+            var FERN = color(113, 208, 120);
+            var BLUE = color(30, 150, 180);
+            var colorChange = 5;
+            var scoreBoard = 0;
+            var lives = 4;
+            var MAX_SPEED = 4;//pixels per frame;
+            var ballX = 200;
+            var ballY = 200;
+            var rr = random(255);
+            var gr = random(255);
+            var br = random(255);
+            var rrr = random(255);
+            var grr = random(255);
+            var brr = random(255);
+            var color1 = color(rr,gr,br);
+            var color2 =color(rrr,grr,brr);
+            var color3 =color(rr, brr,br);
+            collision = false;
+
+            var ball1 = new Ball(ballX, ballY, IVORY, IVORY);
+            ball1.speedX = 5;
+            ball1.speedY = -6;
+
+            var ballSpeedX = ball1.speedX;
+            var ballSpeedY = ball1.speedY;
+
+            var ballMoving = false;
+            if (ballMoving){
+                ballX += ball1.speedX;
+                ballY += ball1.speedY;
+            }
+            else {
+                ballX = mouseX;
+                ballY = 500;
+            }
+
+
+
+            var bumper1 = new Ball(120, 100, color3, color2);
+            var bumper2 = new Ball(280, 100, color3, color2);
+            var bumper3 = new Ball(90, 180, color3, color2);
+            var bumper4 = new Ball(310, 180, color3, color2);
+            var bumper5 = new Ball(200, 140, color3, color2);
+            var bumper6 = new Ball(140, 300, color3, color2);
+            var bumper7 = new Ball(200, 300, color3, color2);
+            var bumper8 = new Ball(260, 300, color3, color2);
+            bumper1.size = 30;
+            bumper2.size = 30;
+            bumper3.size = 30;
+            bumper4.size = 30;
+            bumper5.size = 40;
+            bumper6.size = 30;
+            bumper7.size = 20;
+            bumper8.size = 30;
+
+            var rectangleX = 200;
+            var rectangleY = 500;
+
+            var rectangle1 = new Rectangle(rectangleX,rectangleY,color1,color1);
+
+
+            rectangle1.width = 80;
+            rectangle1.height = 20;
+
+
+            //=============================================================================
+            // kickBallIfOnMouse(myBall)
+            //
+            // Given all the data for a ball's location and speed
+            //    if the mouse is on that ball, then make
+            //    the ball move faster.
+            //=============================================================================
+            function kickBallIfOnMouse(myBall)
+        {
+            //Calculate distance using pythagorean theorem.
+            var dx = myBall.x - mouseX ;
+            var dy = myBall.y - mouseY;
+            var distance = sqrt(dx * dx + dy * dy);
+
+            if (distance <= myBall.size / 2)
+            {
+                myBall.speedX = myBall.speedX * 1.5;
+                myBall.speedY = myBall.speedY * 1.5;
+            }
+        };
+
+        function kickBallIfTouchesBumper(myBall)
+            {
+                //Calculate distance using pythagorean theorem.
+                var dx = myBall.x - bumper1;
+                var dy = myBall.y - bumper1;
+                var distance = sqrt(dx * dx + dy * dy);
+
+                if (distance <= myBall.size / 2)
+                {
+                    myBall.speedX = myBall.speedX * 1.5;
+                    myBall.speedY = myBall.speedY * 1.5;
+                }
+            };
+
+
+
+            //=============================================================================
+            // applyFriction(myBall)
+            //
+            // This method applies a friction force that slows the given ball in the
+            //  x direction and in the y direction.
+            //=============================================================================
+            function applyFriction(myBall)
+            {
+                myBall.speedX = myBall.speedX * 0.997;
+                myBall.speedY = myBall.speedY * 0.997;
+            };
+
+            function applyGravity(myBall)
+            {
+                myBall.speedY = myBall.speedY + .25;
+            }
+
+
+            //=============================================================================
+            // move(myBall)
+            //=============================================================================
+            function move(myBall)
+            {
+                var speed =  vectorLength(myBall.speedX, myBall.speedY);
+                if (speed > MAX_SPEED)
+                {
+                    myBall.speedX*(MAX_SPEED/speed);
+                    myBall.speedY*(MAX_SPEED/speed);
+                }
+
+                myBall.x = myBall.x + myBall.speedX;
+                myBall.y = myBall.y + myBall.speedY;
+            };
+            function moveRectangle(myRectangle)
+            {
+
+
+                myRectangle.x = mouseX - 40;
+                if (mouseX > canvasWidth-263)
+                {
+                    myRectangle.x = canvasWidth-303
+                }
+                if (mouseX < 47)
+                {
+                    myRectangle.x = 9
+                }
+
+            }
+
+
+
+            //=============================================================================
+            // bounceBallIfItHitsWall(myBall)
+            //=============================================================================
+            function bounceBallIfItHitsWall(myBall)
+            {
+                if (myBall.x > (canvasWidth-223) - myBall.size / 2)
+                {
+                    myBall.x = (canvasWidth-223) - myBall.size / 2;
+                    if (myBall.speedX > 0) myBall.speedX = -myBall.speedX;
+                }
+
+
+                if (myBall.y > (canvasHeight-7) - myBall.size / 2)
+                {
+                    myBall.y = (canvasHeight-7) - myBall.size / 2;
+                    if (myBall.speedY > 0) myBall.speedY = -myBall.speedY;
+                }
+
+
+                if (myBall.x < (myBall.size / 2)+7)
+                {
+                    myBall.x  = (myBall.size / 2)+7;
+                    if (myBall.speedX < 0) myBall.speedX = -myBall.speedX;
+                }
+
+                if (myBall.y < (myBall.size / 2)+7)
+                {
+                    myBall.y = (myBall.size / 2)+7;
+                    if (myBall.speedY < 0) myBall.speedY = -myBall.speedY;
+                }
+            };
+            //===========================================================================
+            //  Limits the Rectangle into the left rectangle
+            //===========================================================================
+            function limitRectangle(myRectangle)
+            {
+                if ( myRectangle.x > (canvasWidth- 223) - myRectangle.width/2)
+                {
+                    myRectangle.x = (canvasWidth-223) - myRectangle.width/2;
+
+                }
+            }
+
+
+
+            //=============================================================================
+            // draw()   Called by JavaScript 60 times per second.
+            //=============================================================================
+            function draw()
+            {
+                background(255,255,255);
+                var r1 = random(255);
+                var g1 = random(255);
+                var b1 = random(255);
+                var color4 =color(r1,g1,b1);
+                //======================================================================
+                //              Draws Ball
+                //======================================================================
+              //  kickBallIfOnMouse(ball1);
+                applyFriction(ball1);
+                applyGravity(ball1);
+                bounceBallIfItHitsWall(ball1);
+                move(ball1);
+                //=======================================
+                //     Draws Rectangle
+                //=======================================
+                limitRectangle(rectangle1);
+                moveRectangle(rectangle1);
+
+
+                stroke(rr,rr,rr);
+                //fill(color4);
+                fill(30,110,160);
+                if (scoreBoard>10)fill(color4);
+                if(scoreBoard>15)fill(30,110,160);
+                if (scoreBoard>20)fill(color4);
+                if(scoreBoard>25)fill(30,110,160);
+                if (scoreBoard>30)fill(color4);
+                if(scoreBoard>35)fill(30,110,160);
+                if (scoreBoard>40)fill(color4);
+                if(scoreBoard>45)fill(30,110,160);
+
+                rect(5, 5, 405, 590,20);
+
+                noStroke();
+
+                 //    rect(200, 700, 90, 30, 36);
+                 //  rect(310, 700, 90, 30, 36);
+
+
+
+                if (doesCircleHitCircle(ball1, bumper1)) {
+                    bumperBounce(ball1, bumper1);
+                    bumper1.fillColor=color4;
+                }
+                if (doesCircleHitCircle(ball1, bumper2)) {
+                    bumperBounce(ball1, bumper2);
+                    bumper2.fillColor=color4;
+                }
+                if (doesCircleHitCircle(ball1, bumper3)) {
+                    bumperBounce(ball1, bumper3);
+                    bumper3.fillColor=color4;
+                }
+                if (doesCircleHitCircle(ball1, bumper4)) {
+                    bumperBounce(ball1, bumper4);
+                    bumper4.fillColor=color4;
+                }
+                if (doesCircleHitCircle(ball1, bumper5)) {
+                    bumperBounce(ball1, bumper5);
+                    bumper5.fillColor=color4;
+                }
+                if (doesCircleHitCircle(ball1, bumper6)) {
+                    bumperBounce(ball1, bumper6);
+                    bumper6.fillColor=color4;
+                }
+                if (doesCircleHitCircle(ball1, bumper7)) {
+                    bumperBounce(ball1, bumper7);
+                    bumper7.fillColor=color4;
+                }
+                if (doesCircleHitCircle(ball1, bumper8)) {
+                    bumperBounce(ball1, bumper8);
+                    bumper8.fillColor=color4;
+                }
+
+                if (doesCirlceHitRectangle(ball1,rectangle1)) rectangleBounce(ball1,rectangle1);
+
+                ball1.drawMe();
+                bumper1.drawMe();
+                bumper2.drawMe();
+                bumper3.drawMe();
+                bumper4.drawMe();
+                bumper5.drawMe();
+                bumper6.drawMe();
+                bumper7.drawMe();
+                bumper8.drawMe();
+                rectangle1.drawMe();
+                //======================================
+                //          ScoreBoard
+                //=====================================
+
+                fill(BLUE);
+                rect(420,5,200,125,20);
+                fill(200,255,200);
+                textSize(35);
+                text("ScoreBoard",430,50,50);
+                text(scoreBoard,430,100,100);
+
+                //======================================
+                //          Lives
+                //=====================================
+
+                fill(BLUE);
+                rect(420,210,200,125,20);
+                fill(200,255,200);
+                textSize(35);
+                text("Lives Left",430,260,50);
+                text(lives,430,310,100);
+
+                //=====================
+                if (ballY >= canvasHeight-20){
+                    ballMoving = false;
+                }
+                if (lives <0)
+                {
+                    background(255,255,255);
+                    fill (255,0,0);
+                    text("Game Over", canvasWidth/2, canvasHeight/2);
+
+                }
+
+            };
+
+            var mouseClicked = function() {
+                if (!ballMoving) {
+                    // reset the ball speed
+                    ballSpeedX = speedX;
+                    ballSpeedY = speedY;
+
+                    ballMoving = true;
+                }
+            };
+
+
+
+            //===========================================================================
+            //     doesCircleHitCircle
+            //===========================================================================
+            function doesCircleHitCircle(b1, b2)
+            {
+                //Each ball's radius is 1/2 its size.
+                var r1 = b1.size / 2;
+                var r2 = b2.size / 2;
+
+                //Calculate distance using pythagorean theorem.
+                var dx = b1.x - b2.x;
+                var dy = b1.y - b2.y;
+                var distance = vectorLength(dx, dy);
+
+                //If the distance between the centers is less than the
+                //sum of the two radii, then the circles overlap.
+                if (distance <= r1 + r2)
+                {
+                    Ball.running = true;
+                    if (Ball.running = true)
+                    {
+                        scoreBoard ++;
+                    }
+                 // ball1.this.fillColor = (255,0,0);
+                  return true;
+                }
+
+                return false
+            };
+
+
+
+
+
+            //===========================================================================
+            //     twoBallCollision(b1, b2)
+            //===========================================================================
+            function twoBallCollision(b1, b2)
+            {
+                var dx = b1.x - b2.x;
+                var dy = b1.y - b2.y;
+
+                var dvx = b1.speedX - b2.speedX;
+                var dvy = b1.speedY - b2.speedY;
+
+                var numerator = innerProduct(dvx, dvy, dx, dy);
+                var denominator = vectorLengthSquared(dx, dy);
+                var k = numerator/denominator;
+
+                b1.speedX = b1.speedX - k*dx;
+                b1.speedY = b1.speedY - k*dy;
+
+                b2.speedX = b2.speedX + k*dx;
+                b2.speedY = b2.speedY + k*dy;
+
+            };
+
+
+
+
+            //===========================================================================
+            //     bumperBounce(myBall, myBumper)
+            // When a ball hits a bumper, this function makes the ball bounce but the
+            // keeps the bumper locked in place.
+            //===========================================================================
+            function bumperBounce(myBall, myBumper)
+            {
+                var diffX = myBall.x - myBumper.x;
+                var diffY = myBall.y - myBumper.y;
+                var numerator = innerProduct(myBall.speedX, myBall.speedY, diffX, diffY);
+                var denominator = vectorLengthSquared(diffX, diffY);
+                var k = 2*numerator/denominator;
+
+                myBall.speedX = myBall.speedX - k*diffX;
+                myBall.speedY = myBall.speedY - k*diffY;
+            };
+
+            //===================================================================
+            //      Rectangle Collision
+            //===================================================================
+            function rectangleBounce (myBall, myRectangle)
+            {
+                var diffX = myBall.x - myRectangle.x;
+                var diffY = myBall.y - myRectangle.y;
+                var numerator = innerProduct(myBall.speedX, myBall.speedY, diffX, diffY);
+                var denominator = vectorLengthSquared(diffX, diffY);
+                var k = 2*numerator/denominator;
+
+                myBall.speedX = myBall.speedX - k*diffX;
+                myBall.speedY = myBall.speedY - k*diffY;
+            }
+            function doesCirlceHitRectangle(myBall,myRectangle)
+            {
+              if (myBall.y > 495 && myBall.y < 515 && myBall.x >= mouseX - myRectangle.width/2 && myBall.x <= mouseX + myRectangle.width/2)
+              {
+                    myBall.speedY = - myBall.speedY;
+                  ball1.speedY=ballSpeedY*2.3999;
+                  ball1.speedX=ballSpeedX*random(-1.999,1.999);
+              }
+              if (ball1.y > canvasHeight-15){
+                  lives --;
+                  ball1.x = 200;
+                  ball1.y = 200;
+                  ball1.speedY=ballSpeedY*0;
+                  ball1.speedX=ballSpeedX*random(-0.000999,0.000999);
+
+              }
+
+            }
+
+            //===========================================================================
+            // innerProduct(aX, aY, bX, bY)
+            //===========================================================================
+            function innerProduct(aX, aY, bX, bY)
+            {
+                return aX*bX + aY*bY
+            };
+
+
+            //===========================================================================
+            // vectorLength(x,y)
+            //===========================================================================
+            function vectorLength(x, y)
+            {
+                return sqrt(x*x + y*y);
+            };
+
+
+            //===========================================================================
+            // vectorLengthSquared(x,y)
+            //===========================================================================
+            function vectorLengthSquared(x, y)
+            {
+                return x*x + y*y;
+            };
+
+            //================ END OF MODIFY CODE BLOCK =====================
+        }
+        if (typeof draw !== 'undefined') processing.draw = draw;
+    });
+</script>
+
+<br>
+<br>
+<br>
+
+
+
+<style>
+
+    .button {
+        display: inline-block;
+        padding: 15px 25px;
+        font-size: 24px;
+        cursor: pointer;
+        text-align: center;
+        text-decoration: none;
+        outline: none;
+        color: #fff;
+        background-color: #4CAF50;
+        border: none;
+        border-radius: 15px;
+        box-shadow: 0 9px #999;
+    }
+
+    .button:hover {background-color: #3e8e41}
+
+    .button:active {
+        background-color: #3e8e41;
+        box-shadow: 0 5px #666;
+        transform: translateY(4px);
+    }
+    .button {
+        display: inline-block;
+        padding: 15px 25px;
+        font-size: 24px;
+        cursor: pointer;
+        text-align: center;
+        text-decoration: none;
+        outline: none;
+        color: #fff;
+        background-color: #4CAF50;
+        border: none;
+        border-radius: 15px;
+        box-shadow: 0 9px #999;
+    }
+
+</style>
+
+
+<div>
+      <span style="float:right">
+<button class="button button5" style="vertical-align:middle"><span> <a href = "mainMenu.html" style="text-decoration:none;">
+    <label id="labelDescription">Exit</label></a></span></button></span>
+</div>
+<div>
+      <span style="float:right">
+<button class="button button5" style="vertical-align:middle"><span> <a href = "game.html" style="text-decoration:none;">
+    <label id="labelDescription">Restart</label></a></span></button></span>
+</div>
+</body>
+</html>

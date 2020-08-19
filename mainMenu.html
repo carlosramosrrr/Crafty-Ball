@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>CrazyBall Game</title>
+    <meta charset="UTF-8">
+    <script src="http://cdnjs.cloudflare.com/ajax/libs/processing.js/1.4.8/processing.min.js"></script>
+    <style>
+        .button {
+            display: inline-block;
+            padding: 15px 25px;
+            font-size: 24px;
+            cursor: pointer;
+            text-align: center;
+            text-decoration: none;
+            outline: none;
+            color: #fff;
+            background-color: #4CAF50;
+            border: none;
+            border-radius: 15px;
+            box-shadow: 0 9px #999;
+        }
+
+        .button:hover {background-color: #3e8e41}
+
+        .button:active {
+            background-color: #3e8e41;
+            box-shadow: 0 5px #666;
+            transform: translateY(4px);
+        }
+        .button {
+            display: inline-block;
+            padding: 15px 25px;
+            font-size: 24px;
+            cursor: pointer;
+            text-align: center;
+            text-decoration: none;
+            outline: none;
+            color: #fff;
+            background-color: #4CAF50;
+            border: none;
+            border-radius: 15px;
+            box-shadow: 0 9px #999;
+        }
+        .button2 {
+            background-color: white;
+            color: black;
+            border: 2px solid #008CBA;
+        }
+
+        .button2:hover
+        {
+            background-color: #008CBA;
+            color: white;
+        }
+
+        .button3 {
+            background-color: blue;
+            color: black;
+            border: 2px solid #008CBA;
+
+        .button4 {
+            background-color: white;
+            color: black;
+            border: 2px solid #008CBA;
+
+
+        .button1 {
+            display: inline-block;
+            border-radius: 4px;
+            background-color: #f4511e;
+            border: none;
+            color: #FFFFFF;
+            text-align: center;
+            font-size: 28px;
+            padding: 20px;
+            width: 200px;
+            transition: all 0.5s;
+            cursor: pointer;
+            margin: 5px;
+        }
+
+        .button1 span {
+            cursor: pointer;
+            display: inline-block;
+            position: relative;
+            transition: 0.5s;
+        }
+
+        .button1 span:after {
+            content: '»';
+            position: absolute;
+            opacity: 0;
+            top: 0;
+            right: -20px;
+            transition: 0.5s;
+        }
+
+        .button1:hover span {
+            padding-right: 25px;
+        }
+
+        .button1:hover span:after {
+            opacity: 1;
+            right: 0;
+        }
+        .button5 {border-radius: 50%;}
+    </style>
+</head>
+
+<style type="text/css">body, a:hover {cursor: url(http://cur.cursors-4u.net/user/use-1/use160.cur), progress !important;}</style><a href="http://www.cursors-4u.com/cursor/2011/02/07/harry-potter-magical-wand.html" target="_blank" title="Harry Potter Magical Wand">
+    <img src="http://cur.cursors-4u.net/cursor.png" border="0" alt="Harry Potter Magical Wand" style="position:absolute; top: 0px; right: 0px;" /></a>
+<h1><div style="font-family:verdana;"><b><center><font color = "#a52a2a" face="Comic sans MS" size="9"><label id="labelTitle">Crafty Ball</label></font></center></b></div></h1>
+
+
+<center><button class="button button2"><center><font face="Comic sans MS"> <a href = "game.html" style="text-decoration:none;">
+    <label id="labelDescription">Play Game</label></a></font></center></button></center>
+<br><br><br>
+<center><button class="button button2"><center><font face="Comic sans MS"><a href = "help.html" style="text-decoration:none;">Help</a></font></center></button></center>
+
+<br><br><br>
+<center><button class="button button2"><center><font face="Comic sans MS"><a href = "credits.html" style="text-decoration:none;">Credits</a></font></center></button></center>
+
+
+<canvas id="canvas"></canvas>
+<script>
+
+    var music =new Audio('musicforgame.mp3');
+    music.loop=true;
+    music.play();
+
+
+    var canvas = document.getElementById("canvas");
+    var canvasWidth  = 500;
+    var canvasHeight = 500;
+    var processing = new Processing(canvas, function(processing)
+    {
+        processing.size(canvasWidth, canvasHeight);
+        processing.background(0xFFF);
+
+
+        // Changes API to use degrees rather than radians in rotate and arc.
+        var rotateFn = processing.rotate;
+        processing.rotate = function (angle)
+        {
+            rotateFn(processing.radians(angle));
+        };
+        var arcDeg = processing.arc;
+        processing.arc = function (x, y, w, h, s, e)
+        {
+            arcDeg(x, y, w, h, s * (Math.PI / 180), e * (Math.PI / 180));
+        };
+        function getImage(filename)
+        {
+            processing.externals.sketch.imageCache.add(filename);
+            return processing.loadImage(filename);
+        }
+
+
+
+        with (processing)
+        {
+            var music = new Audio('musicforgame,mp3');
+            music.loop=true;
+            music.play();
+
+            var labelTitle = document.getElementById("labelTitle");
+            var labelDescription = document.getElementById("labelDescription");
+            var button2 = document.getElementById("button2");
+            button2.onclick = function () {action1()};
+
+            action1 = function()
+            {
+                labelTitle.innerHTML = "Help";
+                labelDescription.innerHTML =
+                        "The goal is to keep the ball moving, hitting the bumpers, and prevent it from falling off the table." +
+                          "<br> Once the ball is launched, use the mouse to gide the bar to hit the ball and keep the ball within the table.";
+
+                document.body.style.backgroundColor = "#EE82EE";
+              //  button1.style.visibility="hidden";
+                button2.style.visibility="hidden";
+               // button3.style.visibility="hidden";
+               // button4.style.visibility="hidden";
+               // button5.style.visibility="hidden";
+               // picture.style.visibility="hidden";
+
+                //button1.onclick = function () {beginning()};
+                // button2.onclick = function () {actionEscape()};
+                //button3.onclick = function () {actionGetMauled()};
+                //button4.onclick = function () {actionGetMauled()};
+            };
+          //  var audio = new Audio('.mp3');
+//            audio.play()     // =========================
+             //       //Use of Escape key//
+                ///=========================================================//
+
+                // <marquee behavior="scroll" direction="left" onmouseover="this.stop();" onmouseout="this.start();"> <font color = "brown"> <pre class="tab"><b>Created by:
+                //Ashish Khatri   Daniel Dominguez    Carlos Ramos   Gustavo Burrientos</b> </pre></font></marquee>
+        }
+        if (typeof draw !== 'undefined') processing.draw = draw;
+    });
+    /*function button5(){
+        myWindow.close();
+    } */
+</script>
+</div>
+</body>
+</html>
